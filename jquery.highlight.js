@@ -1,6 +1,8 @@
 /*
  * jQuery Highlight plugin
  *
+ * Modified by plehnen to support RegExp as pattern via new settings parameter "useAsRegExp".
+ * 
  * Based on highlight v3 by Johann Burkard
  * http://johannburkard.de/blog/programming/javascript/highlight-javascript-text-higlighting-jquery-plugin.html
  *
@@ -83,8 +85,8 @@
                     return 1; //skip added node in parent
                 }
             } else if ((node.nodeType === 1 && node.childNodes) && // only element nodes that have children
-                    !/(script|style)/i.test(node.tagName) && // ignore script and style nodes
-                    !(node.tagName === nodeName.toUpperCase() && node.className === className)) { // skip if already highlighted
+                !/(script|style)/i.test(node.tagName) && // ignore script and style nodes
+                !(node.tagName === nodeName.toUpperCase() && node.className === className)) { // skip if already highlighted
                 for (var i = 0; i < node.childNodes.length; i++) {
                     i += jQuery.highlight(node.childNodes[i], re, nodeName, className);
                 }
@@ -95,8 +97,8 @@
 
     jQuery.fn.unhighlight = function (options) {
         var settings = {
-          className: 'highlight',
-          element: 'span'
+            className: 'highlight',
+            element: 'span'
         };
 
         jQuery.extend(settings, options);
@@ -110,27 +112,30 @@
 
     jQuery.fn.highlight = function (words, options) {
         var settings = {
-          className: 'highlight',
-          element: 'span',
-          caseSensitive: false,
-          wordsOnly: false,
-          wordsBoundary: '\\b'
+            className: 'highlight',
+            element: 'span',
+            caseSensitive: false,
+            wordsOnly: false,
+            wordsBoundary: '\\b',
+            useAsRegExp: false
         };
 
         jQuery.extend(settings, options);
 
         if (typeof words === 'string') {
-          words = [words];
+            words = [words];
         }
-        words = jQuery.grep(words, function(word, i){
-          return word != '';
-        });
-        words = jQuery.map(words, function(word, i) {
-          return word.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-        });
+        if (!settings.useAsRegExp) {
+            words = jQuery.grep(words, function(word, i){
+                return word != '';
+            });
+            words = jQuery.map(words, function(word, i) {
+                return word.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+            });
+        }
 
         if (words.length === 0) {
-          return this;
+            return this;
         };
 
         var flag = settings.caseSensitive ? '' : 'i';
